@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dialpad/flutter_dialpad.dart';
 
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -15,10 +18,9 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.green,
         body: SafeArea(
-            child:
-            DialPad(
+            child: DialPad(
                 enableDtmf: true,
                 //outputMask: "(000) 000-0000",
                 hideSubtitle: false,
