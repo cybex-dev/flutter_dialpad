@@ -3,10 +3,14 @@ library flutter_dialpad;
 // import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dialpad/generator/keypad_generator.dart';
 import 'package:flutter_dialpad/widgets/dial_button.dart';
 import 'package:flutter_dialpad/widgets/keypad_grid.dart';
+
+import 'generator/key_value.dart';
 // import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
 // import 'widgets/dial_button.dart';
@@ -55,25 +59,110 @@ class DialPad extends StatelessWidget {
     var size = MediaQuery.of(context).size;
 
     final generator = KeypadGenerator();
-    return KeypadGrid(
-      itemCount: 12,
-      itemBuilder: (context, index) {
-        final key = generator.get(index);
-        double width = size.width / 3;
-        double height = size.height / 4;
-        return Container(
-          alignment: Alignment.center,
-          constraints: BoxConstraints.expand(width: width, height: height),
-          child: Center(
-            child: DialButton.round(
-              title: key.value,
-              onTap: (value) {
-                print('$value was pressed');
-              },
-            ),
-          ),
-        );
-      },
+    return Column(
+      children: [
+        _InputTextField(),
+        SizedBox(height: 8),
+        KeypadGrid(
+          itemCount: 12,
+          itemBuilder: (context, index) {
+            final key = generator.get(index);
+            double width = size.width / 3;
+            double height = size.height / 4;
+            return Container(
+              alignment: Alignment.center,
+              constraints: BoxConstraints.expand(width: width, height: height),
+              child: Center(
+                child: DialButton.round(
+                  title: key.value,
+                  onTap: (value) {
+                    print('$value was pressed');
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _InputTextField extends StatefulWidget {
+  final ValueChanged<String> onChanged;
+  final ValueChanged<KeyValue> onKeyPressed;
+
+  const _InputTextField({super.key, required this.onChanged, required this.onKeyPressed});
+
+  @override
+  State<_InputTextField> createState() => _InputTextFieldState();
+}
+
+class _InputTextFieldState extends State<_InputTextField> {
+  final textEditingController = TextEditingController();
+
+  void _appendText(String value) {
+    widget.onChanged(value);
+    setState(() {
+      textEditingController.text = value;
+    });
+  }
+
+  void _backspace() {
+    if (textEditingController.text.isNotEmpty) {
+      textEditingController.text = textEditingController.text.substring(0, textEditingController.text.length - 1);
+    }
+  }
+
+  void _handleOnKeyEvent(FocusNode node, RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.backspace) {
+        _backspace();
+      } else if (key == LogicalKeyboardKey.numpad0 || key == LogicalKeyboardKey.digit0) {
+        _appendText('0');
+      } else if (key == LogicalKeyboardKey.numpad1 || key == LogicalKeyboardKey.digit1) {
+        _appendText('1');
+      } else if (key == LogicalKeyboardKey.numpad2 || key == LogicalKeyboardKey.digit2) {
+        _appendText('2');
+      } else if (key == LogicalKeyboardKey.numpad3 || key == LogicalKeyboardKey.digit3) {
+        _appendText('3');
+      } else if (key == LogicalKeyboardKey.numpad4 || key == LogicalKeyboardKey.digit4) {
+        _appendText('4');
+      } else if (key == LogicalKeyboardKey.numpad5 || key == LogicalKeyboardKey.digit5) {
+        _appendText('5');
+      } else if (key == LogicalKeyboardKey.numpad6 || key == LogicalKeyboardKey.digit6) {
+        _appendText('6');
+      } else if (key == LogicalKeyboardKey.numpad7 || key == LogicalKeyboardKey.digit7) {
+        _appendText('7');
+      } else if (key == LogicalKeyboardKey.numpad8 || key == LogicalKeyboardKey.digit8) {
+        _appendText('8');
+      } else if (key == LogicalKeyboardKey.numpad9 || key == LogicalKeyboardKey.digit9) {
+        _appendText('9');
+      } else if (key == LogicalKeyboardKey.asterisk) {
+        _appendText('*');
+      } else if (key == LogicalKeyboardKey.numberSign) {
+        _appendText('#');
+      } else {
+        if (kDebugMode) {
+          print('Unhandled key: $key');
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      onKeyEvent: _handleOnKeyEvent,
+      child: TextFormField(
+        readOnly: true,
+        style: TextStyle(color: Colors.black, fontSize: 20),
+        textAlign: TextAlign.center,
+        decoration: InputDecoration(border: InputBorder.none),
+        controller: textEditingController,
+        onChanged: widget.onChanged,
+      ),
     );
   }
 }
