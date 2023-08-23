@@ -49,9 +49,9 @@ class ActionKey extends KeyValue {
 
   const ActionKey(this.action, super.value);
 
-  const ActionKey.enter() : this(DialActionKey.enter, 'enter');
+  const ActionKey.enter() : this(DialActionKey.enter, '>');
 
-  const ActionKey.backspace() : this(DialActionKey.backspace, 'backspace');
+  const ActionKey.backspace() : this(DialActionKey.backspace, '<');
 
   const ActionKey.hash() : this(DialActionKey.hash, '#');
 

@@ -33,11 +33,19 @@ class DialPad extends StatefulWidget {
   final String outputMask;
   final bool enableDtmf;
 
-  // TODO
   final DialPadButtonBuilder? buttonBuilder;
   final KeypadIndexedGenerator? generator;
   final ButtonType buttonType;
   final EdgeInsets buttonPadding;
+
+  /// Whether to call [makeCall] when the enter key is pressed. Defaults to false.
+  final bool callOnEnter;
+
+  /// Whether to copy the text to the clipboard when the text field is tapped. Defaults to true.
+  final bool copyToClipboard;
+
+  /// Whether to paste the text from the clipboard when the text field is tapped. Defaults to true.
+  final bool pasteFromClipboard;
 
   DialPad({
     this.makeCall,
@@ -57,6 +65,9 @@ class DialPad extends StatefulWidget {
     this.generator = const PhoneKeypadGenerator(),
     this.buttonType = ButtonType.rectangle,
     this.buttonPadding = const EdgeInsets.all(0),
+    this.callOnEnter = false,
+    this.copyToClipboard = true,
+    this.pasteFromClipboard = true,
   });
 
   factory DialPad.ios({
@@ -115,7 +126,25 @@ class _DialPadState extends State<DialPad> {
 
   /// Handles dial button press
   void _onDialPressed() {
-    if (widget.makeCall != null) widget.makeCall!(_value);
+    if (widget.makeCall != null && _value.isNotEmpty) {
+      widget.makeCall!(_value);
+    }
+  }
+
+  /// Handles keyboard button presses
+  void _onKeypadPressed(KeyValue key) {
+    if (key is ActionKey && key.action == DialActionKey.backspace) {
+      // handle backspace
+      _onBackspacePressed();
+    }
+    if (key is ActionKey && key.action == DialActionKey.enter) {
+      if (widget.callOnEnter) {
+        _onDialPressed();
+      }
+    } else {
+      // For numbers, and all actions except backspace
+      _onKeyPressed(key.value);
+    }
   }
 
   Widget _defaultDialButtonBuilder(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint) {
@@ -167,15 +196,7 @@ class _DialPadState extends State<DialPad> {
     );
 
     return KeypadFocusNode(
-      onKeypadPressed: (key) {
-        if(key is ActionKey && key.action == DialActionKey.backspace) {
-          // handle backspace
-          _onBackspacePressed();
-        } else {
-          // For numbers, and all actions except backspace
-          _onKeyPressed(key.value);
-        }
-      },
+      onKeypadPressed: _onKeypadPressed,
       child: Column(
         children: [
           PhoneTextField(
@@ -185,10 +206,11 @@ class _DialPadState extends State<DialPad> {
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
             ),
-            copyToClipboard: true,
+            copyToClipboard: widget.copyToClipboard,
             textStyle: TextStyle(color: widget.dialOutputTextColor, fontSize: 24),
             textEditingController: _controller,
             onChanged: _onChanged,
+            readOnly: widget.pasteFromClipboard,
           ),
           Expanded(
             child: KeypadGrid(

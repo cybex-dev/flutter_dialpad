@@ -46,6 +46,8 @@ class KeypadFocusNode extends StatelessWidget {
         onKeypadPressed(ActionKey.asterisk());
       } else if (key == LogicalKeyboardKey.add || key == LogicalKeyboardKey.numpadAdd) {
         onKeypadPressed(ActionKey.plus());
+      } else if (key == LogicalKeyboardKey.numpadEnter) {
+        onKeypadPressed(ActionKey.enter());
       } else if (key == LogicalKeyboardKey.numberSign) {
         onKeypadPressed(ActionKey.hash());
       } else {

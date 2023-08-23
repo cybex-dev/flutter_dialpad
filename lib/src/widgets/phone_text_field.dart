@@ -21,12 +21,16 @@ class PhoneTextField extends StatelessWidget {
   /// The controller for the text field.
   final TextEditingController textEditingController;
 
+  /// Whether the text field is read only. Defaults to false.
+  final bool readOnly;
+
   const PhoneTextField({
     super.key,
     this.textStyle,
     this.color = Colors.white,
     this.decoration = const InputDecoration(border: InputBorder.none),
     this.onChanged,
+    this.readOnly = false,
     this.copyToClipboard = false,
     required this.textEditingController,
   });
@@ -40,7 +44,7 @@ class PhoneTextField extends StatelessWidget {
     final textField = TextFormField(
       style: textStyle,
       decoration: decoration,
-      readOnly: true,
+      readOnly: readOnly,
       textAlign: TextAlign.center,
       controller: textEditingController,
       onChanged: onChanged,
