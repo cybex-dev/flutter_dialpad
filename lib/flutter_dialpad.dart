@@ -1,41 +1,70 @@
 library flutter_dialpad;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dialpad/src/widgets/phone_text_field.dart';
-
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
 import 'flutter_dialpad.dart';
 
 export 'src/flutter_dialpad.dart';
 
-// import 'package:flutter_dtmf/dtmf.dart';
-
 typedef DialPadButtonBuilder = Widget Function(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint);
 
 class DialPad extends StatefulWidget {
+  /// Callback when the dial button is pressed.
   final ValueSetter<String>? makeCall;
+
+  /// Callback when a key is pressed.
   final ValueSetter<String>? keyPressed;
+
+  /// Whether to hide the dial button. Defaults to false.
   final bool hideDialButton;
+
+  /// Whether to hide the subtitle on the dial pad buttons. Defaults to false.
   final bool hideSubtitle;
 
   // buttonColor is the color of the button on the dial pad. defaults to Colors.gray
   final Color buttonColor;
+
+  /// Color of the button text, defaults to black
   final Color buttonTextColor;
+
+  /// Color of the dial button, defaults to green
   final Color dialButtonColor;
+
+  /// Color of the dial button icon, defaults to white
   final Color dialButtonIconColor;
+
+  /// Icon for the dial button, defaults to Icons.phone
   final IconData dialButtonIcon;
+
+  /// Color of the backspace button icon, defaults to grey
   final Color backspaceButtonIconColor;
+
+  /// Color of the output text, defaults to black
   final Color dialOutputTextColor;
 
+  /// Font size for the output text, defaults to 24
+  final double dialOutputTextSize;
+
   // outputMask is the mask applied to the output text. Defaults to (000) 000-0000
-  final String outputMask;
+  // Deprecated until [phone_number] or similar package is integrated
+  final String? outputMask;
+  final String hint;
+
+  // Disabled temporarily until [flutter_dtmf] has been updated.
   final bool enableDtmf;
 
+  /// Builder for the keypad buttons. Defaults to [DialPadButtonBuilder].
+  /// Note: this has not yet been fully integrated for customer use - this will be available in a future release.
   final DialPadButtonBuilder? buttonBuilder;
+
+  /// Generator for the keypad buttons. Defaults to [PhoneKeypadGenerator].
   final KeypadIndexedGenerator? generator;
+
+  /// Button display style (clipping). Defaults to [ButtonType.rectangle].
   final ButtonType buttonType;
+
+  /// Padding around the button. Defaults to [EdgeInsets.all(0)].
   final EdgeInsets buttonPadding;
 
   /// Whether to call [makeCall] when the enter key is pressed. Defaults to false.
@@ -52,13 +81,17 @@ class DialPad extends StatefulWidget {
     this.keyPressed,
     this.hideDialButton = false,
     this.hideSubtitle = false,
+    @Deprecated(
+        'Use [hint] instead, this has been deprecated until [phone_number] or similar package is integrated to handle international masks supporting multiple regions.')
     this.outputMask = '(000) 000-0000',
+    this.hint = '(000) 000-0000',
     this.buttonColor = Colors.grey,
     this.buttonTextColor = Colors.black,
     this.dialButtonColor = Colors.green,
     this.dialButtonIconColor = Colors.white,
     this.dialButtonIcon = Icons.phone,
     this.dialOutputTextColor = Colors.black,
+    this.dialOutputTextSize = 24,
     this.backspaceButtonIconColor = Colors.grey,
     this.enableDtmf = false,
     this.buttonBuilder,
@@ -85,7 +118,7 @@ class DialPad extends StatefulWidget {
       buttonTextColor: Colors.black87,
       buttonColor: Colors.grey[300]!,
       buttonType: ButtonType.circle,
-      buttonPadding: EdgeInsets.all(24),
+      buttonPadding: EdgeInsets.all(16),
     );
   }
 
@@ -94,38 +127,31 @@ class DialPad extends StatefulWidget {
 }
 
 class _DialPadState extends State<DialPad> {
-  final MaskedTextController _controller = MaskedTextController(mask: "(000) 000-0000");
-  String _value = "";
+  final TextEditingController _controller = TextEditingController();
 
   /// Handles keypad button press, this includes numbers and [DialActionKey] except [DialActionKey.backspace]
   void _onKeyPressed(String? value) {
-    print(value);
     if (value != null) {
       setState(() {
         _controller.text += value;
-        // we get the value from the controller as it will have been masked
-        _value = _controller.value.text;
       });
     }
   }
 
-  /// Handles text field changes
-  void _onChanged(String value) {
-    setState(() {
-      _value = value;
-    });
-  }
-
   /// Handles backspace button press
   void _onBackspacePressed() {
+    if (_controller.text.isEmpty) {
+      return;
+    }
     setState(() {
-      _value = _value.substring(0, _value.length - 1);
+      final _value = _controller.text.isEmpty ? "" : _controller.text.substring(0, _controller.text.length - 1);
       _controller.text = _value;
     });
   }
 
   /// Handles dial button press
   void _onDialPressed() {
+    final _value = _controller.text;
     if (widget.makeCall != null && _value.isNotEmpty) {
       widget.makeCall!(_value);
     }
@@ -136,8 +162,7 @@ class _DialPadState extends State<DialPad> {
     if (key is ActionKey && key.action == DialActionKey.backspace) {
       // handle backspace
       _onBackspacePressed();
-    }
-    if (key is ActionKey && key.action == DialActionKey.enter) {
+    } else if (key is ActionKey && key.action == DialActionKey.enter) {
       if (widget.callOnEnter) {
         _onDialPressed();
       }
@@ -164,34 +189,38 @@ class _DialPadState extends State<DialPad> {
 
   @override
   Widget build(BuildContext context) {
-    final _dialButtonBuilder = widget.buttonBuilder ?? _defaultDialButtonBuilder;
+    final _dialButtonBuilder = /*widget.buttonBuilder ?? */_defaultDialButtonBuilder;
     final _generator = widget.generator ?? IosKeypadGenerator();
 
+    /// Dial button
+    final dialButton = ActionButton(
+      padding: widget.buttonPadding,
+      buttonType: widget.buttonType,
+      icon: widget.dialButtonIcon,
+      iconColor: widget.dialButtonIconColor,
+      color: widget.dialButtonColor,
+      onTap: _onDialPressed,
+      disabled: widget.hideDialButton,
+    );
+
+    /// Backspace button
+    final backspaceButton = ActionButton(
+      onTap: _onBackspacePressed,
+      disabled: _controller.text.isEmpty,
+      buttonType: widget.buttonType,
+      iconSize: 75,
+      iconColor: widget.backspaceButtonIconColor,
+      padding: widget.buttonPadding,
+      icon: Icons.backspace,
+      color: Colors.transparent,
+    );
+
+    /// Footer contains the dial and backspace buttons
     final footer = Row(
       children: [
         Expanded(child: Container()),
-        Expanded(
-          child: ActionButton(
-            padding: widget.buttonPadding,
-            buttonType: widget.buttonType,
-            icon: widget.dialButtonIcon,
-            color: widget.dialButtonColor,
-            onTap: _onDialPressed,
-            disabled: widget.hideDialButton,
-          ),
-        ),
-        Expanded(
-          child: ActionButton(
-            onTap: _onBackspacePressed,
-            disabled: _value.isEmpty,
-            buttonType: widget.buttonType,
-            iconSize: 75,
-            iconColor: widget.backspaceButtonIconColor,
-            padding: widget.buttonPadding,
-            icon: Icons.backspace,
-            color: Colors.transparent,
-          ),
-        ),
+        Expanded(child: dialButton),
+        Expanded(child: backspaceButton),
       ],
     );
 
@@ -202,14 +231,13 @@ class _DialPadState extends State<DialPad> {
           PhoneTextField(
             color: Colors.white,
             decoration: InputDecoration(
-              hintText: widget.outputMask,
+              hintText: widget.outputMask ?? widget.hint,
               hintStyle: TextStyle(color: Colors.grey),
               border: InputBorder.none,
             ),
             copyToClipboard: widget.copyToClipboard,
-            textStyle: TextStyle(color: widget.dialOutputTextColor, fontSize: 24),
+            textStyle: TextStyle(color: widget.dialOutputTextColor, fontSize: widget.dialOutputTextSize),
             textEditingController: _controller,
-            onChanged: _onChanged,
             readOnly: widget.pasteFromClipboard,
           ),
           Expanded(

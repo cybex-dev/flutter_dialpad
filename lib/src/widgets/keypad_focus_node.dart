@@ -5,7 +5,6 @@ import '../models/key_value.dart';
 
 /// This widget is used to capture key events from the keyboard, and translate them into [DigitKey] or [ActionKey] events.
 class KeypadFocusNode extends StatelessWidget {
-
   /// This callback is called when a key is pressed on the keyboard.
   final ValueChanged<KeyValue> onKeypadPressed;
 
@@ -17,38 +16,40 @@ class KeypadFocusNode extends StatelessWidget {
   /// Handles the key events from the keyboard, and translates them into [DigitKey] or [ActionKey] events that are passed to [onKeypadPressed].
   /// Returns [KeyEventResult.handled] if the event was handled, or [KeyEventResult.ignored] if the event was ignored.
   KeyEventResult _handleOnKeyEvent(FocusNode node, KeyEvent event) {
-    // check if this is a key down event, otherwise we might get the same event multiple times
-    if (event is KeyDownEvent) {
-      final key = event.logicalKey;
-      if (key == LogicalKeyboardKey.backspace) {
-        onKeypadPressed(ActionKey.backspace());
-      } else if (key == LogicalKeyboardKey.numpad0 || key == LogicalKeyboardKey.digit0) {
+    if ((event is KeyRepeatEvent || event is KeyDownEvent) && event.logicalKey == LogicalKeyboardKey.backspace) {
+      onKeypadPressed(ActionKey.backspace());
+      return KeyEventResult.handled;
+    } else if (event is KeyDownEvent) {
+      // check if this is a key down event, otherwise we might get the same event multiple times
+      final physicalKey = event.physicalKey;
+      final logicalKey = event.logicalKey;
+      if (physicalKey == PhysicalKeyboardKey.numpad0 || physicalKey == PhysicalKeyboardKey.digit0) {
         onKeypadPressed(DigitKey(0));
-      } else if (key == LogicalKeyboardKey.numpad1 || key == LogicalKeyboardKey.digit1) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad1 || physicalKey == PhysicalKeyboardKey.digit1) {
         onKeypadPressed(DigitKey(1));
-      } else if (key == LogicalKeyboardKey.numpad2 || key == LogicalKeyboardKey.digit2) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad2 || physicalKey == PhysicalKeyboardKey.digit2) {
         onKeypadPressed(DigitKey(2));
-      } else if (key == LogicalKeyboardKey.numpad3 || key == LogicalKeyboardKey.digit3) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad3 || physicalKey == PhysicalKeyboardKey.digit3) {
         onKeypadPressed(DigitKey(3));
-      } else if (key == LogicalKeyboardKey.numpad4 || key == LogicalKeyboardKey.digit4) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad4 || physicalKey == PhysicalKeyboardKey.digit4) {
         onKeypadPressed(DigitKey(4));
-      } else if (key == LogicalKeyboardKey.numpad5 || key == LogicalKeyboardKey.digit5) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad5 || physicalKey == PhysicalKeyboardKey.digit5) {
         onKeypadPressed(DigitKey(5));
-      } else if (key == LogicalKeyboardKey.numpad6 || key == LogicalKeyboardKey.digit6) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad6 || physicalKey == PhysicalKeyboardKey.digit6) {
         onKeypadPressed(DigitKey(6));
-      } else if (key == LogicalKeyboardKey.numpad7 || key == LogicalKeyboardKey.digit7) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad7 || physicalKey == PhysicalKeyboardKey.digit7) {
         onKeypadPressed(DigitKey(7));
-      } else if (key == LogicalKeyboardKey.numpad8 || key == LogicalKeyboardKey.digit8) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad8 || physicalKey == PhysicalKeyboardKey.digit8) {
         onKeypadPressed(DigitKey(8));
-      } else if (key == LogicalKeyboardKey.numpad9 || key == LogicalKeyboardKey.digit9) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpad9 || physicalKey == PhysicalKeyboardKey.digit9) {
         onKeypadPressed(DigitKey(9));
-      } else if (key == LogicalKeyboardKey.asterisk || key == LogicalKeyboardKey.numpadMultiply) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpadMultiply || logicalKey == LogicalKeyboardKey.asterisk) {
         onKeypadPressed(ActionKey.asterisk());
-      } else if (key == LogicalKeyboardKey.add || key == LogicalKeyboardKey.numpadAdd) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpadAdd || logicalKey == LogicalKeyboardKey.add) {
         onKeypadPressed(ActionKey.plus());
-      } else if (key == LogicalKeyboardKey.numpadEnter) {
+      } else if (physicalKey == PhysicalKeyboardKey.numpadEnter) {
         onKeypadPressed(ActionKey.enter());
-      } else if (key == LogicalKeyboardKey.numberSign) {
+      } else if (logicalKey == LogicalKeyboardKey.numberSign) {
         onKeypadPressed(ActionKey.hash());
       } else {
         return KeyEventResult.ignored;
