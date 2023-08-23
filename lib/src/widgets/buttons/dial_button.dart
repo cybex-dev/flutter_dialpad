@@ -138,6 +138,7 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
     );
 
     final materialColor = createMaterialColor(widget.color);
+    final splashColor = materialColor[200];
     final highlightColor = materialColor[800];
 
     // Use MaterialButton to get the Material ripple, splash and highlight colors including animations and gestures.
@@ -145,7 +146,7 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
       padding: widget.padding,
       // child: MaterialButton(
       child: MaterialButton(
-        splashColor: Colors.transparent,
+        splashColor: splashColor,
         highlightColor: highlightColor,
         color: materialColor,
         onPressed: widget.onTap != null ? () => widget.onTap!.call(widget.title) : null,

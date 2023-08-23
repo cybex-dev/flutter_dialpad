@@ -41,7 +41,7 @@ class DigitKey extends KeyValue {
   }
 }
 
-enum DialActionKey { backspace, asterisk, hash, plus }
+enum DialActionKey { backspace, asterisk, hash, plus, enter }
 
 class ActionKey extends KeyValue {
 
@@ -49,7 +49,9 @@ class ActionKey extends KeyValue {
 
   const ActionKey(this.action, super.value);
 
-  const ActionKey.backspace() : this(DialActionKey.backspace, '<');
+  const ActionKey.enter() : this(DialActionKey.enter, 'enter');
+
+  const ActionKey.backspace() : this(DialActionKey.backspace, 'backspace');
 
   const ActionKey.hash() : this(DialActionKey.hash, '#');
 

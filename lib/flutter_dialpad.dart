@@ -2,6 +2,7 @@ library flutter_dialpad;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dialpad/src/widgets/phone_text_field.dart';
 
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
@@ -13,7 +14,7 @@ export 'src/flutter_dialpad.dart';
 
 typedef DialPadButtonBuilder = Widget Function(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint);
 
-class DialPad extends StatelessWidget {
+class DialPad extends StatefulWidget {
   final ValueSetter<String>? makeCall;
   final ValueSetter<String>? keyPressed;
   final bool hideDialButton;
@@ -65,7 +66,8 @@ class DialPad extends StatelessWidget {
     return DialPad(
       makeCall: makeCall,
       keyPressed: keyPressed,
-      dialButtonIcon: CupertinoIcons.phone_solid,
+      // Cupertino icons should be used here
+      dialButtonIcon: Icons.phone,
       backspaceButtonIconColor: Colors.grey,
       generator: IosKeypadGenerator(),
       dialOutputTextColor: Colors.black87,
@@ -73,53 +75,90 @@ class DialPad extends StatelessWidget {
       buttonColor: Colors.grey[300]!,
       buttonType: ButtonType.circle,
       buttonPadding: EdgeInsets.all(24),
-      hideDialButton: true,
     );
+  }
+
+  @override
+  State<DialPad> createState() => _DialPadState();
+}
+
+class _DialPadState extends State<DialPad> {
+  final MaskedTextController _controller = MaskedTextController(mask: "(000) 000-0000");
+  String _value = "";
+
+  /// Handles keypad button press, this includes numbers and [DialActionKey] except [DialActionKey.backspace]
+  void _onKeyPressed(String? value) {
+    print(value);
+    if (value != null) {
+      setState(() {
+        _controller.text += value;
+        // we get the value from the controller as it will have been masked
+        _value = _controller.value.text;
+      });
+    }
+  }
+
+  /// Handles text field changes
+  void _onChanged(String value) {
+    setState(() {
+      _value = value;
+    });
+  }
+
+  /// Handles backspace button press
+  void _onBackspacePressed() {
+    setState(() {
+      _value = _value.substring(0, _value.length - 1);
+      _controller.text = _value;
+    });
+  }
+
+  /// Handles dial button press
+  void _onDialPressed() {
+    if (widget.makeCall != null) widget.makeCall!(_value);
   }
 
   Widget _defaultDialButtonBuilder(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint) {
     return DialButton(
       title: key.value,
       subtitle: altKey?.value ?? hint,
-      color: buttonColor,
-      hideSubtitle: hideSubtitle,
-      onTap: (value) {
-        if (value != null) print('$value was pressed');
-      },
-      buttonType: buttonType,
-      padding: buttonPadding,
-      textColor: buttonTextColor,
-      iconColor: buttonTextColor,
-      subtitleIconColor: buttonTextColor,
+      color: widget.buttonColor,
+      hideSubtitle: widget.hideSubtitle,
+      onTap: _onKeyPressed,
+      buttonType: widget.buttonType,
+      padding: widget.buttonPadding,
+      textColor: widget.buttonTextColor,
+      iconColor: widget.buttonTextColor,
+      subtitleIconColor: widget.buttonTextColor,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final _dialButtonBuilder = buttonBuilder ?? _defaultDialButtonBuilder;
-    final _generator = generator ?? IosKeypadGenerator();
+    final _dialButtonBuilder = widget.buttonBuilder ?? _defaultDialButtonBuilder;
+    final _generator = widget.generator ?? IosKeypadGenerator();
 
     final footer = Row(
       children: [
         Expanded(child: Container()),
         Expanded(
           child: ActionButton(
-            padding: buttonPadding,
-            buttonType: buttonType,
-            icon: dialButtonIcon,
-            color: dialButtonColor,
-            onTap: () => makeCall?.call(""),
-            disabled: hideDialButton,
+            padding: widget.buttonPadding,
+            buttonType: widget.buttonType,
+            icon: widget.dialButtonIcon,
+            color: widget.dialButtonColor,
+            onTap: _onDialPressed,
+            disabled: widget.hideDialButton,
           ),
         ),
         Expanded(
           child: ActionButton(
-            onTap: () => print('backspace pressed'),
-            disabled: false,
-            buttonType: buttonType,
+            onTap: _onBackspacePressed,
+            disabled: _value.isEmpty,
+            buttonType: widget.buttonType,
             iconSize: 75,
-            iconColor: backspaceButtonIconColor,
-            padding: buttonPadding,
+            iconColor: widget.backspaceButtonIconColor,
+            padding: widget.buttonPadding,
             icon: Icons.backspace,
             color: Colors.transparent,
           ),
@@ -128,11 +167,29 @@ class DialPad extends StatelessWidget {
     );
 
     return KeypadFocusNode(
-      onKeypadPressed: (KeyValue value) {
-        print('keypad pressed: $value');
+      onKeypadPressed: (key) {
+        if(key is ActionKey && key.action == DialActionKey.backspace) {
+          // handle backspace
+          _onBackspacePressed();
+        } else {
+          // For numbers, and all actions except backspace
+          _onKeyPressed(key.value);
+        }
       },
       child: Column(
         children: [
+          PhoneTextField(
+            color: Colors.white,
+            decoration: InputDecoration(
+              hintText: widget.outputMask,
+              hintStyle: TextStyle(color: Colors.grey),
+              border: InputBorder.none,
+            ),
+            copyToClipboard: true,
+            textStyle: TextStyle(color: widget.dialOutputTextColor, fontSize: 24),
+            textEditingController: _controller,
+            onChanged: _onChanged,
+          ),
           Expanded(
             child: KeypadGrid(
               itemCount: 12,
@@ -150,143 +207,3 @@ class DialPad extends StatelessWidget {
     );
   }
 }
-
-// class _DialPadState extends State<DialPad> {
-//   // MaskedTextController? textEditingController;
-//   // var _value = "";
-//   // var mainTitle = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "＃"];
-//   // var subTitle = ["", "ABC", "DEF", "GHI", "JKL", "MNO", "PQRS", "TUV", "WXYZ", null, "+", null];
-//
-//   @override
-//   void initState() {
-//     // textEditingController = MaskedTextController(mask: widget.outputMask != null ? widget.outputMask : '(000) 000-0000');
-//     super.initState();
-//   }
-//
-//   // _setText(String? value) async {
-//   //   if ((widget.enableDtmf == null || widget.enableDtmf!) && value != null)
-//   //   // Dtmf.playTone(digits: value.trim(), samplingRate: 8000, durationMs: 160);
-//   //
-//   //   if (widget.keyPressed != null) widget.keyPressed!(value!);
-//   //
-//   //   setState(() {
-//   //     _value += value!;
-//   //     textEditingController!.text = _value;
-//   //   });
-//   // }
-//
-//   // List<Widget> _getDialerButtons() {
-//   //   var rows = <Widget>[];
-//   //   var items = <Widget>[];
-//   //
-//   //   for (var i = 0; i < mainTitle.length; i++) {
-//   //     if (i % 3 == 0 && i > 0) {
-//   //       rows.add(Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: items));
-//   //       rows.add(SizedBox(
-//   //         height: 12,
-//   //       ));
-//   //       items = <Widget>[];
-//   //     }
-//   //
-//   //     items.add(DialButton(
-//   //       title: mainTitle[i],
-//   //       subtitle: subTitle[i],
-//   //       hideSubtitle: widget.hideSubtitle!,
-//   //       color: widget.buttonColor,
-//   //       textColor: widget.buttonTextColor,
-//   //       onTap: _setText,
-//   //     ));
-//   //   }
-//   //   //To Do: Fix this workaround for last row
-//   //   rows.add(Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: items));
-//   //   rows.add(SizedBox(
-//   //     height: 12,
-//   //   ));
-//   //
-//   //   return rows;
-//   // }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return GridView.builder(
-//       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 3, childAspectRatio: 1.0, crossAxisSpacing: 10, mainAxisSpacing: 10),
-//       itemBuilder: (context, index) {
-//         return Container(
-//           alignment: Alignment.center,
-//           child: Text(
-//             'Item $index',
-//             style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.black),
-//           ),
-//         );
-//       },
-//     );
-//
-//     // var screenSize = MediaQuery.of(context).size;
-//     // var sizeFactor = screenSize.height * 0.09852217;
-//     //
-//     // return Center(
-//     //   child: Column(
-//     //     children: <Widget>[
-//     //       Padding(
-//     //         padding: EdgeInsets.all(20),
-//     //         child: TextFormField(
-//     //           readOnly: true,
-//     //           style: TextStyle(color: widget.dialOutputTextColor ?? Colors.black, fontSize: sizeFactor / 2),
-//     //           textAlign: TextAlign.center,
-//     //           decoration: InputDecoration(border: InputBorder.none),
-//     //           controller: textEditingController,
-//     //         ),
-//     //       ),
-//     //       ..._getDialerButtons(),
-//     //       SizedBox(
-//     //         height: 15,
-//     //       ),
-//     //       Row(
-//     //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//     //         children: <Widget>[
-//     //           Expanded(
-//     //             child: Container(),
-//     //           ),
-//     //           Expanded(
-//     //             child: widget.hideDialButton != null && widget.hideDialButton!
-//     //                 ? Container()
-//     //                 : Center(
-//     //                     child: DialButton(
-//     //                       icon: widget.dialButtonIcon != null ? widget.dialButtonIcon : Icons.phone,
-//     //                       color: widget.dialButtonColor != null ? widget.dialButtonColor! : Colors.green,
-//     //                       hideSubtitle: widget.hideSubtitle!,
-//     //                       onTap: (value) {
-//     //                         widget.makeCall!(_value);
-//     //                       },
-//     //                     ),
-//     //                   ),
-//     //           ),
-//     //           Expanded(
-//     //             child: Padding(
-//     //               padding: EdgeInsets.only(right: screenSize.height * 0.03685504),
-//     //               child: IconButton(
-//     //                 icon: Icon(
-//     //                   Icons.backspace,
-//     //                   size: sizeFactor / 2,
-//     //                   color: _value.length > 0 ? (widget.backspaceButtonIconColor != null ? widget.backspaceButtonIconColor : Colors.white24) : Colors.white24,
-//     //                 ),
-//     //                 onPressed: _value.length == 0
-//     //                     ? null
-//     //                     : () {
-//     //                         if (_value.length > 0) {
-//     //                           setState(() {
-//     //                             _value = _value.substring(0, _value.length - 1);
-//     //                             textEditingController!.text = _value;
-//     //                           });
-//     //                         }
-//     //                       },
-//     //               ),
-//     //             ),
-//     //           )
-//     //         ],
-//     //       )
-//     //     ],
-//     //   ),
-//     // );
-//   }
-// }

@@ -25,16 +25,23 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: SafeArea(
-            child: DialPad(
+            child: DialPad.ios(
               makeCall: _makeCall,
               keyPressed: _keyPressed,
-              buttonType: ButtonType.circle,
-              buttonPadding: EdgeInsets.all(16),
             )
             // child: DialPad(
+            //   makeCall: _makeCall,
+            //   keyPressed: _keyPressed,
             //   buttonType: ButtonType.circle,
+            //   dialButtonColor: Colors.blue,
+            //   buttonColor: Colors.white,
+            //   buttonTextColor: Colors.black54,
+            // )
+            // child: DialPad(
+            //   buttonType: ButtonType.rectangle,
             //   buttonPadding: EdgeInsets.all(24),
             //   buttonTextColor: Colors.white,
             //   buttonColor: Colors.blue,
