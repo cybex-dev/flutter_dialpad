@@ -1,60 +1,132 @@
 library flutter_dialpad;
 
-// import 'dart:async';
-import 'dart:math';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dialpad/generator/phone_keypad_generator.dart';
-import 'package:flutter_dialpad/widgets/dial_button.dart';
-import 'package:flutter_dialpad/widgets/keypad_focus_node.dart';
-import 'package:flutter_dialpad/widgets/keypad_grid.dart';
 
-import 'models/key_value.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
+import 'flutter_dialpad.dart';
+
+export 'src/flutter_dialpad.dart';
+
 // import 'package:flutter_dtmf/dtmf.dart';
+
+typedef DialPadButtonBuilder = Widget Function(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint);
 
 class DialPad extends StatelessWidget {
   final ValueSetter<String>? makeCall;
   final ValueSetter<String>? keyPressed;
-  final bool? hideDialButton;
-  final bool? hideSubtitle;
+  final bool hideDialButton;
+  final bool hideSubtitle;
 
   // buttonColor is the color of the button on the dial pad. defaults to Colors.gray
-  final Color? buttonColor;
-  final Color? buttonTextColor;
-  final Color? dialButtonColor;
-  final Color? dialButtonIconColor;
-  final IconData? dialButtonIcon;
-  final Color? backspaceButtonIconColor;
-  final Color? dialOutputTextColor;
+  final Color buttonColor;
+  final Color buttonTextColor;
+  final Color dialButtonColor;
+  final Color dialButtonIconColor;
+  final IconData dialButtonIcon;
+  final Color backspaceButtonIconColor;
+  final Color dialOutputTextColor;
 
   // outputMask is the mask applied to the output text. Defaults to (000) 000-0000
-  final String? outputMask;
-  final bool? enableDtmf;
+  final String outputMask;
+  final bool enableDtmf;
+
+  // TODO
+  final DialPadButtonBuilder? buttonBuilder;
+  final KeypadIndexedGenerator? generator;
+  final ButtonType buttonType;
+  final EdgeInsets buttonPadding;
 
   DialPad({
     this.makeCall,
     this.keyPressed,
-    this.hideDialButton,
+    this.hideDialButton = false,
     this.hideSubtitle = false,
-    this.outputMask,
-    this.buttonColor,
-    this.buttonTextColor,
-    this.dialButtonColor,
-    this.dialButtonIconColor,
-    this.dialButtonIcon,
-    this.dialOutputTextColor,
-    this.backspaceButtonIconColor,
-    this.enableDtmf,
+    this.outputMask = '(000) 000-0000',
+    this.buttonColor = Colors.grey,
+    this.buttonTextColor = Colors.black,
+    this.dialButtonColor = Colors.green,
+    this.dialButtonIconColor = Colors.white,
+    this.dialButtonIcon = Icons.phone,
+    this.dialOutputTextColor = Colors.black,
+    this.backspaceButtonIconColor = Colors.grey,
+    this.enableDtmf = false,
+    this.buttonBuilder,
+    this.generator = const PhoneKeypadGenerator(),
+    this.buttonType = ButtonType.rectangle,
+    this.buttonPadding = const EdgeInsets.all(0),
   });
 
-  // @override
-  // _DialPadState createState() => _DialPadState();
+  factory DialPad.ios({
+    ValueSetter<String>? makeCall,
+    ValueSetter<String>? keyPressed,
+  }) {
+    return DialPad(
+      makeCall: makeCall,
+      keyPressed: keyPressed,
+      dialButtonIcon: CupertinoIcons.phone_solid,
+      backspaceButtonIconColor: Colors.grey,
+      generator: IosKeypadGenerator(),
+      dialOutputTextColor: Colors.black87,
+      buttonTextColor: Colors.black87,
+      buttonColor: Colors.grey[300]!,
+      buttonType: ButtonType.circle,
+      buttonPadding: EdgeInsets.all(24),
+      hideDialButton: true,
+    );
+  }
+
+  Widget _defaultDialButtonBuilder(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint) {
+    return DialButton(
+      title: key.value,
+      subtitle: altKey?.value ?? hint,
+      color: buttonColor,
+      hideSubtitle: hideSubtitle,
+      onTap: (value) {
+        if (value != null) print('$value was pressed');
+      },
+      buttonType: buttonType,
+      padding: buttonPadding,
+      textColor: buttonTextColor,
+      iconColor: buttonTextColor,
+      subtitleIconColor: buttonTextColor,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final generator = PhoneKeypadGenerator();
+    final _dialButtonBuilder = buttonBuilder ?? _defaultDialButtonBuilder;
+    final _generator = generator ?? IosKeypadGenerator();
+
+    final footer = Row(
+      children: [
+        Expanded(child: Container()),
+        Expanded(
+          child: ActionButton(
+            padding: buttonPadding,
+            buttonType: buttonType,
+            icon: dialButtonIcon,
+            color: dialButtonColor,
+            onTap: () => makeCall?.call(""),
+            disabled: hideDialButton,
+          ),
+        ),
+        Expanded(
+          child: ActionButton(
+            onTap: () => print('backspace pressed'),
+            disabled: false,
+            buttonType: buttonType,
+            iconSize: 75,
+            iconColor: backspaceButtonIconColor,
+            padding: buttonPadding,
+            icon: Icons.backspace,
+            color: Colors.transparent,
+          ),
+        ),
+      ],
+    );
+
     return KeypadFocusNode(
       onKeypadPressed: (KeyValue value) {
         print('keypad pressed: $value');
@@ -65,22 +137,12 @@ class DialPad extends StatelessWidget {
             child: KeypadGrid(
               itemCount: 12,
               itemBuilder: (context, index) {
-                final key = generator.get(index);
-                final hint = generator.hint(index);
-                return DialButton(
-                  // buttonType: DialButtonType.circle,
-                  title: key.value,
-                  subtitle: hint,
-                  color: Colors.grey,
-                  hideSubtitle: false,
-                  onTap: (value) {
-                    print('$value was pressed');
-                  },
-                  onLongTap: (value) {
-                    print('$value was pressed');
-                  },
-                );
+                final key = _generator.get(index);
+                final altKey = _generator.getAlt(index);
+                final hint = _generator.hint(index);
+                return _dialButtonBuilder(context, index, key, altKey, hint);
               },
+              footer: footer,
             ),
           ),
         ],

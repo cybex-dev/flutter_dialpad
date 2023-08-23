@@ -7,6 +7,9 @@ abstract class KeypadIndexedGenerator {
   /// Returns a [KeyValue] for a given index.
   KeyValue get(int index);
 
+  /// Returns a [KeyValue] for a given index's alternate selection (i.e. long press).
+  KeyValue? getAlt(int index);
+
   /// Returns a hint for a given index.
   String? hint(int index) => null;
 }

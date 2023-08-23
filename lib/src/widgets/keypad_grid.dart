@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class KeypadGrid extends StatelessWidget {
-
   /// The number of items in the grid.
   final int itemCount;
 
@@ -11,13 +10,16 @@ class KeypadGrid extends StatelessWidget {
   /// The number of items in each row of the grid.
   final int crossAxisCount;
 
-  const KeypadGrid({super.key, required this.itemBuilder, required this.itemCount, this.crossAxisCount = 3});
+  /// The number of items in each row of the grid.
+  final Widget? footer;
+
+  const KeypadGrid({super.key, required this.itemBuilder, required this.itemCount, this.crossAxisCount = 3, this.footer});
 
   @override
   Widget build(BuildContext context) {
     final length = (itemCount / crossAxisCount).floor();
 
-    final items = List.generate(length, (index) => index).map((e) {
+    List<Widget> items = List.generate(length, (index) => index).map((e) {
       final subItems = List.generate(
         crossAxisCount,
         (index) {
@@ -30,6 +32,10 @@ class KeypadGrid extends StatelessWidget {
         child: Row(children: subItems),
       );
     }).toList();
+    if (footer != null)
+      items.add(
+        Expanded(child: footer!),
+      );
 
     return Column(children: items);
   }

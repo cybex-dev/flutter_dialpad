@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-enum DialButtonType { rectangle, circle }
+import '../../utils/material_color.dart';
+import 'button_type.dart';
 
 class DialButton extends StatefulWidget {
   final Key? key;
@@ -16,10 +17,10 @@ class DialButton extends StatefulWidget {
   final bool hideSubtitle;
 
   /// Background color of the button. Defaults to system/material color.
-  final Color? color;
+  final Color color;
 
   /// Text color of the button. Defaults to [Colors.black].
-  final Color? textColor;
+  final Color textColor;
 
   /// Icon to replace the title.
   final IconData? icon;
@@ -36,19 +37,10 @@ class DialButton extends StatefulWidget {
   /// Callback when the button is tapped.
   final ValueSetter<String?>? onTap;
 
-  /// Callback when the button is long tapped, the associated hint will be passed to the callback.
-  ///
-  /// Note: this only applies if the button title is "*", the hint will be the subtitle which is '+'.
-  final ValueSetter<String?>? onLongTap;
-
-  @Deprecated(
-      'Manual animations are no longer supported, since animations are handled by Material library. This parameter will be removed in a future release.')
-  final bool shouldAnimate;
-
-  /// Button display style (clipping). Defaults to [DialButtonType.rectangle].
-  /// [DialButtonType.circle] will clip the button to a circle e.g. an iPhone keypad
-  /// [DialButtonType.rectangle] will clip the button to a rectangle e.g. an Android keypad
-  final DialButtonType buttonType;
+  /// Button display style (clipping). Defaults to [ButtonType.rectangle].
+  /// [ButtonType.circle] will clip the button to a circle e.g. an iPhone keypad
+  /// [ButtonType.rectangle] will clip the button to a rectangle e.g. an Android keypad
+  final ButtonType buttonType;
 
   /// Padding around the button. Defaults to [EdgeInsets.all(12)].
   final EdgeInsets padding;
@@ -57,8 +49,6 @@ class DialButton extends StatefulWidget {
   ///
   /// For example, if the screen height/width (the smaller of the 2) is 1000, the title font size will be 75.
   final double fontSize;
-  @Deprecated('Use fontSize instead')
-  final double? titleFontSize;
 
   /// Font size for the subtitle, as a percentage of the screen height. Defaults to 25.
   ///
@@ -80,18 +70,15 @@ class DialButton extends StatefulWidget {
     this.title,
     this.subtitle,
     this.hideSubtitle = false,
-    this.color,
+    this.color = Colors.grey,
     this.textColor = Colors.black,
     this.icon,
     this.subtitleIcon,
     this.iconColor = Colors.white,
     this.subtitleIconColor,
-    this.shouldAnimate = true,
     this.onTap,
-    this.onLongTap,
-    this.buttonType = DialButtonType.rectangle,
+    this.buttonType = ButtonType.rectangle,
     this.padding = const EdgeInsets.all(0),
-    this.titleFontSize = 75,
     this.fontSize = 75,
     this.subtitleFontSize = 25,
     this.iconSize = 75,
@@ -108,16 +95,18 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
     var size = MediaQuery.of(context).size;
     double unitTextSize = min(size.height, size.width) * 0.001;
 
-    final titleWidget = widget.icon != null
+    // Get title widget, prefer icon over title
+    Widget titleWidget = widget.icon != null
         ? Icon(widget.icon, size: widget.iconSize * unitTextSize, color: widget.iconColor)
         : Text(
             widget.title!,
             style: TextStyle(
-              fontSize: unitTextSize * (widget.titleFontSize ?? widget.fontSize),
-              color: widget.textColor != null ? widget.textColor : Colors.black,
+              fontSize: unitTextSize * (widget.fontSize),
+              color: widget.textColor,
             ),
           );
 
+    // Get subtitle widget, prefer subtitleIcon over subtitle
     final subtitleWidget = widget.subtitleIcon != null
         ? Icon(widget.subtitleIcon, size: widget.subtitleIconSize * unitTextSize, color: widget.subtitleIconColor ?? widget.iconColor)
         : (widget.subtitle != null)
@@ -127,32 +116,48 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
               )
             : null;
 
+    // correction for asterisk being "higher" than other buttons (only if we don't have subtitles to show)
+    titleWidget = widget.title == "*" && (subtitleWidget == null || widget.hideSubtitle == true)
+        ? Transform.translate(
+            offset: Offset(0, 10 * unitTextSize),
+            child: titleWidget,
+          )
+        : titleWidget;
+
+    // Create dial button text content
     final child = Center(
-      child: subtitleWidget == null
+      child: subtitleWidget == null || widget.hideSubtitle == true
           ? titleWidget
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(height: 8),
                 titleWidget,
                 subtitleWidget,
               ],
             ),
     );
 
+    final materialColor = createMaterialColor(widget.color);
+    final highlightColor = materialColor[800];
+
+    // Use MaterialButton to get the Material ripple, splash and highlight colors including animations and gestures.
     return Padding(
       padding: widget.padding,
+      // child: MaterialButton(
       child: MaterialButton(
-        onPressed: widget.onTap != null ? () => widget.onTap!.call(widget.title) : null,
-        onLongPress: widget.title == "*" && widget.onLongTap != null ? () => widget.onLongTap!.call(widget.subtitle) : null,
-        padding: EdgeInsets.zero,
-        color: widget.color,
         splashColor: Colors.transparent,
-        highlightColor: Colors.white54,
-        hoverColor: Colors.white10,
+        highlightColor: highlightColor,
+        color: materialColor,
+        onPressed: widget.onTap != null ? () => widget.onTap!.call(widget.title) : null,
+        onLongPress: !widget.hideSubtitle && widget.onTap != null ? () => widget.onTap!.call(widget.subtitle) : null,
         animationDuration: Duration(milliseconds: 300),
         child: child,
-        shape: widget.buttonType == DialButtonType.rectangle ? RoundedRectangleBorder(borderRadius: BorderRadius.zero) : CircleBorder(),
+        shape: widget.buttonType == ButtonType.rectangle ? RoundedRectangleBorder(borderRadius: BorderRadius.zero) : CircleBorder(),
+        materialTapTargetSize: widget.buttonType == ButtonType.rectangle ? MaterialTapTargetSize.padded : MaterialTapTargetSize.shrinkWrap,
+        padding: EdgeInsets.zero,
+        elevation: 0,
+        highlightElevation: 0,
+        hoverElevation: 0,
       ),
     );
   }

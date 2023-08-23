@@ -10,8 +10,8 @@ import 'keypad_indexed_generator.dart';
 /// ```
 ///
 /// For index values 0-8, 10, the [DigitKey] value is returned. For index values 9 and 11, the [ActionKey] value is returned.
-class PhoneKeypadGenerator extends KeypadIndexedGenerator {
-  const PhoneKeypadGenerator();
+class IosKeypadGenerator extends KeypadIndexedGenerator {
+  const IosKeypadGenerator();
 
   @override
   KeyValue get(int index) {
@@ -24,6 +24,16 @@ class PhoneKeypadGenerator extends KeypadIndexedGenerator {
         return ActionKey.hash();
       default:
         return DigitKey(index + 1);
+    }
+  }
+
+  @override
+  KeyValue? getAlt(int index) {
+    switch (index) {
+      case 10:
+        return ActionKey.plus();
+      default:
+        return null;
     }
   }
 
@@ -56,7 +66,7 @@ class PhoneKeypadGenerator extends KeypadIndexedGenerator {
         return 'TUV';
       case 8:
         return 'WXYZ';
-      case 9:
+      case 10:
         return '+';
       default:
         return null;
