@@ -57,9 +57,7 @@ class PhoneKeypadGenerator extends KeypadIndexedGenerator {
       case 8:
         return 'WXYZ';
       case 9:
-        return '*';
-      case 11:
-        return '#';
+        return '+';
       default:
         return null;
     }

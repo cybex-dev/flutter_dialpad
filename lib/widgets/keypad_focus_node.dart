@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dialpad/models/key_value.dart';
+
+import '../models/key_value.dart';
 
 /// This widget is used to capture key events from the keyboard, and translate them into [DigitKey] or [ActionKey] events.
 class KeypadFocusNode extends StatelessWidget {
@@ -44,6 +44,8 @@ class KeypadFocusNode extends StatelessWidget {
         onKeypadPressed(DigitKey(9));
       } else if (key == LogicalKeyboardKey.asterisk || key == LogicalKeyboardKey.numpadMultiply) {
         onKeypadPressed(ActionKey.asterisk());
+      } else if (key == LogicalKeyboardKey.add || key == LogicalKeyboardKey.numpadAdd) {
+        onKeypadPressed(ActionKey.plus());
       } else if (key == LogicalKeyboardKey.numberSign) {
         onKeypadPressed(ActionKey.hash());
       } else {

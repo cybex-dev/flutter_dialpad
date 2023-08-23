@@ -1,5 +1,5 @@
-import 'package:flutter_dialpad/generator/keypad_indexed_generator.dart';
-import 'package:flutter_dialpad/generator/phone_keypad_generator.dart';
+import '../generator/keypad_indexed_generator.dart';
+import '../generator/phone_keypad_generator.dart';
 
 /// A raw KeyEvent, retaining a keyboard key.
 class KeyValue {
@@ -41,14 +41,19 @@ class DigitKey extends KeyValue {
   }
 }
 
-enum DialActionKey { backspace, asterisk, hash }
+enum DialActionKey { backspace, asterisk, hash, plus }
 
 class ActionKey extends KeyValue {
-  const ActionKey(DialActionKey action, super.value);
+
+  final DialActionKey action;
+
+  const ActionKey(this.action, super.value);
 
   const ActionKey.backspace() : this(DialActionKey.backspace, '<');
 
   const ActionKey.hash() : this(DialActionKey.hash, '#');
+
+  const ActionKey.plus() : this(DialActionKey.plus, '+');
 
   const ActionKey.asterisk() : this(DialActionKey.asterisk, '*');
 

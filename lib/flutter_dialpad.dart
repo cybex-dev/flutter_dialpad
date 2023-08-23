@@ -10,9 +10,8 @@ import 'package:flutter_dialpad/widgets/keypad_focus_node.dart';
 import 'package:flutter_dialpad/widgets/keypad_grid.dart';
 
 import 'models/key_value.dart';
-// import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
-// import 'widgets/dial_button.dart';
 // import 'package:flutter_dtmf/dtmf.dart';
 
 class DialPad extends StatelessWidget {
@@ -68,18 +67,18 @@ class DialPad extends StatelessWidget {
               itemBuilder: (context, index) {
                 final key = generator.get(index);
                 final hint = generator.hint(index);
-                return Expanded(
-                  child: Container(
-                    color: Colors.red,
-                    child: DialButton.round(
-                      title: key.value,
-                      subtitle: hint,
-                      hideSubtitle: false,
-                      onTap: (value) {
-                        print('$value was pressed');
-                      },
-                    ),
-                  ),
+                return DialButton(
+                  // buttonType: DialButtonType.circle,
+                  title: key.value,
+                  subtitle: hint,
+                  color: Colors.grey,
+                  hideSubtitle: false,
+                  onTap: (value) {
+                    print('$value was pressed');
+                  },
+                  onLongTap: (value) {
+                    print('$value was pressed');
+                  },
                 );
               },
             ),
