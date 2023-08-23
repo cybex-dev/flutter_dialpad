@@ -30,7 +30,7 @@ class DialButton extends StatefulWidget {
     this.shouldAnimate,
     this.onTap,
     this.buttonType = DialButtonType.rectangle,
-    this.padding = const EdgeInsets.all(4),
+    this.padding = const EdgeInsets.all(12),
   });
 
   DialButton.rectangle({
@@ -45,7 +45,7 @@ class DialButton extends StatefulWidget {
     this.shouldAnimate,
     this.onTap,
     this.buttonType = DialButtonType.rectangle,
-    this.padding = const EdgeInsets.all(4),
+    this.padding = const EdgeInsets.all(12),
   });
 
   DialButton.round({
@@ -60,7 +60,7 @@ class DialButton extends StatefulWidget {
     this.shouldAnimate,
     this.onTap,
     this.buttonType = DialButtonType.circle,
-    this.padding = const EdgeInsets.all(4),
+    this.padding = const EdgeInsets.all(0),
   });
 
   @override
@@ -99,8 +99,8 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    double unitHeightValue = min(size.height, size.width) * 0.01;
-    double multiplier = 9;
+    double unitHeightValue = min(size.height, size.width) * 0.001;
+    double multiplier = 100;
 
     final child = AnimatedBuilder(
       animation: _colorTween,
@@ -108,13 +108,12 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
         color: _colorTween.value,
         child: Center(
           child: widget.icon == null
-              ? Container(
-                  child: Text(
-                    widget.title!,
-                    style: TextStyle(
-                      fontSize: unitHeightValue * multiplier,
-                      color: widget.textColor != null ? widget.textColor : Colors.black,
-                    ),
+              ? Text(
+                  widget.title!,
+                  style: TextStyle(
+                    fontSize: unitHeightValue * multiplier,
+                    // fontSize: 84,
+                    color: widget.textColor != null ? widget.textColor : Colors.black,
                   ),
                 )
               : Icon(widget.icon, color: widget.iconColor != null ? widget.iconColor : Colors.white),
@@ -142,8 +141,13 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
       child: widget.buttonType == DialButtonType.rectangle
           ? Container(padding: widget.padding, child: child)
           : Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: widget.color != null ? widget.color : Colors.white24,
+              ),
               padding: widget.padding,
-              child: ClipOval(child: child, clipBehavior: Clip.antiAliasWithSaveLayer, clipper: CircleClipper()),
+              // child: ClipOval(child: child, clipBehavior: Clip.antiAliasWithSaveLayer, clipper: CircleClipper()),
+              child: child,
             ),
     );
   }

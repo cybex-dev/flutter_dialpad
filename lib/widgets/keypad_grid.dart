@@ -12,19 +12,17 @@ class KeypadGrid extends StatelessWidget {
     final length = (itemCount / crossAxisCount).floor();
 
     final items = List.generate(length, (index) => index).map((e) {
-      final subItems = List.generate(crossAxisCount, (index) {
+      final subItems = List.generate(
+        crossAxisCount,
+        (index) {
           return itemBuilder(context, e * crossAxisCount + index);
         },
       );
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: subItems,
+      return Expanded(
+        child: Row(children: subItems),
       );
     }).toList();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: items,
-    );
+    return Column(children: items);
   }
 }
