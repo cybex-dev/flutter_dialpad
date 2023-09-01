@@ -17,6 +17,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_web_frame: ^1.0.0
+
   flutter_dialpad:
     path: ../
 

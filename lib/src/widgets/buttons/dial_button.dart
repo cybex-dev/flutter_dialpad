@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../utils/material_color.dart';
-import 'button_type.dart';
+import '../scalable/scalable_shape.dart';
 
 class DialButton extends StatefulWidget {
   final Key? key;
@@ -37,10 +37,10 @@ class DialButton extends StatefulWidget {
   /// Callback when the button is tapped.
   final ValueSetter<String?>? onTap;
 
-  /// Button display style (clipping). Defaults to [ButtonType.rectangle].
-  /// [ButtonType.circle] will clip the button to a circle e.g. an iPhone keypad
-  /// [ButtonType.rectangle] will clip the button to a rectangle e.g. an Android keypad
-  final ButtonType buttonType;
+  /// Button display style (clipping). Defaults to [ScalableShape.rectangle].
+  /// [ScalableShape.circle] will clip the button to a circle e.g. an iPhone keypad
+  /// [ScalableShape.rectangle] will clip the button to a rectangle e.g. an Android keypad
+  final ScalableShape buttonType;
 
   /// Padding around the button. Defaults to [EdgeInsets.all(12)].
   final EdgeInsets padding;
@@ -77,7 +77,7 @@ class DialButton extends StatefulWidget {
     this.iconColor = Colors.white,
     this.subtitleIconColor,
     this.onTap,
-    this.buttonType = ButtonType.rectangle,
+    this.buttonType = ScalableShape.rectangle,
     this.padding = const EdgeInsets.all(0),
     this.fontSize = 75,
     this.subtitleFontSize = 25,
@@ -153,8 +153,8 @@ class _DialButtonState extends State<DialButton> with SingleTickerProviderStateM
         onLongPress: !widget.hideSubtitle && widget.onTap != null ? () => widget.onTap!.call(widget.subtitle) : null,
         animationDuration: Duration(milliseconds: 300),
         child: child,
-        shape: widget.buttonType == ButtonType.rectangle ? RoundedRectangleBorder(borderRadius: BorderRadius.zero) : CircleBorder(),
-        materialTapTargetSize: widget.buttonType == ButtonType.rectangle ? MaterialTapTargetSize.padded : MaterialTapTargetSize.shrinkWrap,
+        shape: widget.buttonType == ScalableShape.rectangle ? RoundedRectangleBorder(borderRadius: BorderRadius.zero) : CircleBorder(),
+        materialTapTargetSize: widget.buttonType == ScalableShape.rectangle ? MaterialTapTargetSize.padded : MaterialTapTargetSize.shrinkWrap,
         padding: EdgeInsets.zero,
         elevation: 0,
         highlightElevation: 0,

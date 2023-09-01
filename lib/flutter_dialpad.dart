@@ -8,6 +8,7 @@ import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 // import 'package:flutter_dtmf/dtmf.dart';
 
 import 'src/flutter_dialpad.dart';
+import 'src/widgets/scalable/scaling_type.dart';
 
 export 'src/flutter_dialpad.dart';
 
@@ -76,8 +77,8 @@ class DialPad extends StatefulWidget {
   /// Generator for the keypad buttons. Defaults to [PhoneKeypadGenerator].
   final KeypadIndexedGenerator? generator;
 
-  /// Button display style (clipping). Defaults to [ButtonType.rectangle].
-  final ButtonType buttonType;
+  /// Button display style (clipping). Defaults to [ScalableShape.rectangle].
+  final ScalableShape buttonType;
 
   /// Padding around the button. Defaults to [EdgeInsets.all(0)].
   final EdgeInsets buttonPadding;
@@ -93,6 +94,10 @@ class DialPad extends StatefulWidget {
 
   /// Padding around the text field. Defaults to [EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 16)].
   final EdgeInsets textFieldPadding;
+
+  /// Scaling type for the dial pad. Defaults to [ScalingType.min].
+  @Deprecated('This has not yet been fully integrated for customer use and thus has no effect on the output - will be available in a future release.')
+  final ScalingType scalingType;
 
   DialPad({
     this.makeCall,
@@ -116,12 +121,14 @@ class DialPad extends StatefulWidget {
     @Deprecated('This has not yet been fully integrated for customer use and thus has no effect on the output - will be available in a future release.')
     this.keypadButtonBuilder,
     this.generator = const PhoneKeypadGenerator(),
-    this.buttonType = ButtonType.rectangle,
+    this.buttonType = ScalableShape.rectangle,
     this.buttonPadding = const EdgeInsets.all(0),
     this.callOnEnter = false,
     this.copyToClipboard = true,
     this.pasteFromClipboard = true,
     this.textFieldPadding = const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 16),
+    @Deprecated('This has not yet been fully integrated for customer use and thus has no effect on the output - will be available in a future release.')
+    this.scalingType = ScalingType.min,
   });
 
   /// Returns a [DialPad] with an iOS-style design (i.e. Apple).
@@ -139,7 +146,7 @@ class DialPad extends StatefulWidget {
       dialOutputTextColor: Colors.black87,
       buttonTextColor: Colors.black87,
       buttonColor: Colors.grey[300]!,
-      buttonType: ButtonType.circle,
+      buttonType: ScalableShape.circle,
       buttonPadding: EdgeInsets.all(16),
       dialOutputTextSize: 75,
     );
@@ -160,7 +167,7 @@ class DialPad extends StatefulWidget {
       dialOutputTextColor: Colors.black87,
       buttonTextColor: Colors.black54,
       buttonColor: Colors.white,
-      buttonType: ButtonType.rectangle,
+      buttonType: ScalableShape.rectangle,
       dialOutputTextSize: 75,
       dialButtonColor: Colors.blue,
     );

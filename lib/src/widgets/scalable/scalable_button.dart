@@ -1,12 +1,11 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_dialpad/flutter_dialpad.dart';
+import 'package:flutter_dialpad/src/widgets/scalable/scaling_type.dart';
 
-import '../../utils/material_color.dart';
-import '../scalable/scalable_shape.dart';
-
-class ActionButton extends StatelessWidget {
-  final Key? key;
-
+class ScalableButton extends StatelessWidget {
   /// Whether to disable the button. Defaults to false.
   final bool disabled;
 
@@ -25,7 +24,7 @@ class ActionButton extends StatelessWidget {
   /// Button display style (clipping). Defaults to [ScalableShape.rectangle].
   /// [ScalableShape.circle] will clip the button to a circle e.g. an iPhone keypad
   /// [ScalableShape.rectangle] will clip the button to a rectangle e.g. an Android keypad
-  final ScalableShape buttonType;
+  final ScalableShape scalableShape;
 
   /// Padding around the button. Defaults to [EdgeInsets.all(12)].
   final EdgeInsets padding;
@@ -35,17 +34,11 @@ class ActionButton extends StatelessWidget {
   /// For example, if the screen height/width (the smaller of the 2) is 1000, the icon size will be 75.
   final double iconSize;
 
-  ActionButton({
-    this.key,
-    this.color = Colors.grey,
-    required this.icon,
-    this.iconColor = Colors.white,
-    required this.onTap,
-    this.buttonType = ScalableShape.rectangle,
-    this.padding = const EdgeInsets.all(0),
-    this.iconSize = 75,
-    this.disabled = false,
-  });
+  /// [ScalingType] for the button. Defaults to [ScalingType.none].
+  /// The [Scalable] widget will scale the button based on the [ScalingType] provided.
+  final ScalingType scalingType;
+
+  const ScalableButton({super.key, required this.icon, this.iconColor = Colors.white, required this.onTap, this.scalableShape = ScalableShape.rectangle, this.padding = const EdgeInsets.all(0), this.iconSize = 75, this.disabled = false, this.color = Colors.grey, this.scalingType = ScalingType.fixed});
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +64,8 @@ class ActionButton extends StatelessWidget {
         child: Center(
           child: callIcon,
         ),
-        shape: buttonType == ScalableShape.rectangle ? RoundedRectangleBorder(borderRadius: BorderRadius.zero) : CircleBorder(),
-        materialTapTargetSize: buttonType == ScalableShape.rectangle ? MaterialTapTargetSize.padded : MaterialTapTargetSize.shrinkWrap,
+        shape: scalableShape == ButtonType.rectangle ? RoundedRectangleBorder(borderRadius: BorderRadius.zero) : CircleBorder(),
+        materialTapTargetSize: scalableShape == ButtonType.rectangle ? MaterialTapTargetSize.padded : MaterialTapTargetSize.shrinkWrap,
         padding: EdgeInsets.zero,
         elevation: 0,
         highlightElevation: 0,
