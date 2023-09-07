@@ -19,9 +19,42 @@ class DialPadIos extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: UIAppBar(title: 'DialPad iOS-style'),
-      body: DialPad.ios(
-        makeCall: _makeCall,
-        keyPressed: _keyPressed,
+      body: Column(
+        children: [
+          SizedBox(height: 80),
+          Divider(),
+          Expanded(
+            child: DialPad(
+              generator: IosKeypadGenerator(),
+              pasteFromClipboard: true,
+              copyToClipboard: false,
+              callOnEnter: true,
+              enableDtmf: false,
+              buttonColor: Colors.transparent,
+              buttonTextColor: Color(0xff1D295B),
+              dialButtonColor: Color(0xff456bf6),
+              dialButtonIcon: Icons.phone,
+              dialOutputTextColor: Color(0xff1D295B),
+              backspaceButtonIconColor: Color(0xff1D295B),
+              buttonType: ButtonType.circle,
+              subtitleTextSize: 40,
+              buttonTextSize: 100,
+              buttonPadding: const EdgeInsets.all(4),
+              dialButtonPadding: const EdgeInsets.all(8),
+              dialingButtonScalingSize: ScalingSize.large,
+              backspaceButtonPadding: const EdgeInsets.all(24),
+              backspaceButtonScalingSize: ScalingSize.medium,
+              scalingType: ScalingType.height,
+              outputMask: null,
+              hint: '',
+              makeCall: (phoneNumber) async {
+
+              },
+            ),
+          ),
+          Divider(),
+          SizedBox(height: 110),
+        ],
       ),
     );
   }

@@ -16,6 +16,7 @@ class KeypadFocusNode extends StatelessWidget {
   /// Handles the key events from the keyboard, and translates them into [DigitKey] or [ActionKey] events that are passed to [onKeypadPressed].
   /// Returns [KeyEventResult.handled] if the event was handled, or [KeyEventResult.ignored] if the event was ignored.
   KeyEventResult _handleOnKeyEvent(FocusNode node, KeyEvent event) {
+    print("Key pressed: ${event.logicalKey}");
     if ((event is KeyRepeatEvent || event is KeyDownEvent) && event.logicalKey == LogicalKeyboardKey.backspace) {
       onKeypadPressed(ActionKey.backspace());
       return KeyEventResult.handled;
