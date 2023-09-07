@@ -2,6 +2,7 @@ library flutter_dialpad;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+
 // disabled temporarily
 // import 'package:flutter_dtmf/dtmf.dart';
 
@@ -83,6 +84,12 @@ class DialPad extends StatefulWidget {
   /// Padding around the button. Defaults to [buttonPadding].
   final EdgeInsets? backspaceButtonPadding;
 
+  /// Background color of the backspace button. Defaults to [buttonColor].
+  final Color? backspaceButtonColor;
+
+  /// Icon size of the backspace button. Defaults to [75].
+  final double? backspaceButtonIconSize;
+
   /// Padding around the button. Defaults to [buttonPadding].
   final EdgeInsets? dialButtonPadding;
 
@@ -109,6 +116,18 @@ class DialPad extends StatefulWidget {
 
   /// [ScalingType] for the dial button. Defaults to [ScalingSize.small].
   final ScalingSize? backspaceButtonScalingSize;
+
+  final double? maxScalingSize;
+
+  final double? minScalingSize;
+
+  final double? dialButtonIconSize;
+
+  final EdgeInsets? dialContentPadding;
+
+  final EdgeInsets? backspaceContentPadding;
+
+  final EdgeInsets? keyButtonContentPadding;
 
   DialPad({
     this.makeCall,
@@ -144,6 +163,14 @@ class DialPad extends StatefulWidget {
     this.scalingSize = ScalingSize.medium,
     this.dialingButtonScalingSize,
     this.backspaceButtonScalingSize,
+    this.backspaceButtonColor,
+    this.backspaceButtonIconSize,
+    this.minScalingSize,
+    this.maxScalingSize,
+    this.dialButtonIconSize,
+    this.dialContentPadding,
+    this.backspaceContentPadding,
+    this.keyButtonContentPadding,
   });
 
   /// Returns a [DialPad] with an iOS-style design (i.e. Apple).
@@ -254,15 +281,17 @@ class _DialPadState extends State<DialPad> {
     }
   }
 
-  Widget _defaultDialButtonBuilder(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint) {
+  Widget _defaultKeypadButtonBuilder(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint) {
     return ActionButton(
       title: key.value,
       subtitle: altKey?.value ?? hint,
       color: widget.buttonColor,
       hideSubtitle: widget.hideSubtitle,
       onTap: () => _onKeypadPressed(key),
+      onLongPressed: () => _onKeypadPressed(altKey ?? key),
       buttonType: widget.buttonType,
       padding: widget.buttonPadding,
+      contentPadding: widget.keyButtonContentPadding,
       textColor: widget.buttonTextColor,
       iconColor: widget.buttonTextColor,
       subtitleIconColor: widget.buttonTextColor,
@@ -270,18 +299,21 @@ class _DialPadState extends State<DialPad> {
       fontSize: widget.buttonTextSize,
       scalingType: widget.scalingType,
       scalingSize: widget.scalingSize,
+      minScalingSize: widget.minScalingSize,
+      maxScalingSize: widget.maxScalingSize,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final _keypadButtonBuilder = /*widget.keypadButtonBuilder ??  */ _defaultDialButtonBuilder;
+    final _keypadButtonBuilder = /*widget.keypadButtonBuilder ??  */ _defaultKeypadButtonBuilder;
     final _generator = widget.generator ?? IosKeypadGenerator();
 
     /// Dial button
     final dialButton = widget.hideDialButton
         ? null
         : ActionButton(
+            iconSize: widget.dialButtonIconSize ?? 75,
             padding: widget.dialButtonPadding ?? widget.buttonPadding,
             buttonType: widget.buttonType,
             icon: widget.dialButtonIcon,
@@ -290,6 +322,9 @@ class _DialPadState extends State<DialPad> {
             onTap: _onDialPressed,
             scalingType: widget.scalingType,
             scalingSize: widget.dialingButtonScalingSize ?? widget.scalingSize,
+            minScalingSize: widget.minScalingSize,
+            maxScalingSize: widget.maxScalingSize,
+            contentPadding: widget.dialContentPadding,
             // NOTE(cybex-dev) add as option in future
             // disabled: _value.isEmpty || widget.makeCall == null,
           );
@@ -301,13 +336,16 @@ class _DialPadState extends State<DialPad> {
             onTap: _onBackspacePressed,
             // disabled: _value.isEmpty,
             buttonType: widget.buttonType,
-            iconSize: 75,
+            iconSize: widget.backspaceButtonIconSize ?? 75,
             iconColor: widget.backspaceButtonIconColor,
             padding: widget.backspaceButtonPadding ?? widget.buttonPadding,
             icon: Icons.backspace,
-            color: Colors.transparent,
+            color: widget.backspaceButtonColor ?? Colors.transparent,
             scalingType: widget.scalingType,
             scalingSize: widget.backspaceButtonScalingSize ?? widget.scalingSize,
+            minScalingSize: widget.minScalingSize,
+            maxScalingSize: widget.maxScalingSize,
+            contentPadding: widget.backspaceContentPadding,
           );
 
     /// Footer contains the dial and backspace buttons
