@@ -262,6 +262,15 @@ class _DialPadState extends State<DialPad> {
     super.initState();
     _controller = MaskedTextController(text: widget.initialText ?? widget.withNumber, mask: widget.outputMask);
     _value = _controller.text;
+    _controller.addListener(_onTextChangedListener);
+  }
+
+  /// Handles text field content change internally i.e. copy-paste, etc into field
+  void _onTextChangedListener() {
+    setState(() {
+      _value = _controller.text;
+      _controller.updateText(_value);
+    });
   }
 
   /// Handles text field content change, notifies [onTextChanged] callback
@@ -455,6 +464,7 @@ class _DialPadState extends State<DialPad> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChangedListener);
     _controller.dispose();
     super.dispose();
   }
