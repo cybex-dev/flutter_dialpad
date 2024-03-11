@@ -66,8 +66,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "156f63b77d23148d9f1544230e3201ab6172f470"
-      resolved-ref: "156f63b77d23148d9f1544230e3201ab6172f470"
+      ref: "85d0a99c0ae8b4a3c6230a440d44ff1127a1500a"
+      resolved-ref: "85d0a99c0ae8b4a3c6230a440d44ff1127a1500a"
       url: "https://github.com/cybex-dev/flutter_masked_text"
     source: git
     version: "0.9.1"

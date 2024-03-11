@@ -16,7 +16,7 @@ dependencies:
   flutter_masked_text2:
     git:
         url: https://github.com/cybex-dev/flutter_masked_text
-        ref: 156f63b77d23148d9f1544230e3201ab6172f470 # branch 'fix_null_mask'
+        ref: 85d0a99c0ae8b4a3c6230a440d44ff1127a1500a # branch 'master'
   #auto_size_text: ^2.0.2+1
 
 dev_dependencies:

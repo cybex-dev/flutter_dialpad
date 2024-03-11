@@ -9,6 +9,7 @@ import 'src/flutter_dialpad.dart';
 export 'src/flutter_dialpad.dart';
 
 typedef DialPadButtonBuilder = Widget Function(BuildContext context, int index, KeyValue key, KeyValue? altKey, String? hint);
+typedef BeforeTextChangeModifier = String Function(String text);
 
 class DialPad extends StatefulWidget {
   /// Callback when the dial button is pressed.
@@ -145,6 +146,9 @@ class DialPad extends StatefulWidget {
   /// Hide backspace button when text field is empty. Defaults to [false].
   final bool hideBackspaceOnEmpty;
 
+  /// A modifier to be applied before the text is changed. Defaults to [null].
+  final BeforeTextChangeModifier? beforeChangeModifier;
+
   DialPad({
     this.makeCall,
     this.initialText,
@@ -191,6 +195,7 @@ class DialPad extends StatefulWidget {
     this.backspaceContentPadding,
     this.keyButtonContentPadding,
     this.hideBackspaceOnEmpty = false,
+    this.beforeChangeModifier,
   });
 
   /// Returns a [DialPad] with an iOS-style design (i.e. Apple).
@@ -260,7 +265,11 @@ class _DialPadState extends State<DialPad> {
   @override
   void initState() {
     super.initState();
-    _controller = MaskedTextController(text: widget.initialText ?? widget.withNumber, mask: widget.outputMask);
+    _controller = MaskedTextController(
+      text: widget.initialText ?? widget.withNumber,
+      mask: widget.outputMask,
+      beforeChangeModifier: widget.beforeChangeModifier,
+    );
     _value = _controller.text;
     _controller.addListener(_onTextChangedListener);
   }
